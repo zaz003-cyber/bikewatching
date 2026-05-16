@@ -166,14 +166,20 @@ ${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`
     const filteredTrips = filterTripsByTime(trips, timeFilter);
     const filteredStations = computeStationTraffic(stations, filteredTrips);
 
-    timeFilter === -1
-      ? radiusScale.range([0, 25])
-      : radiusScale.range([3, 50]);
-      
-    circles
-      .data(filteredStations, (d) => d.short_name)
-      .join('circle')
-      .attr('r', (d) => radiusScale(d.totalTraffic));
+    radiusScale
+    .domain([0, d3.max(filteredStations, (d) => d.totalTraffic)])
+    .range(timeFilter === -1 ? [0, 25] : [3, 50]);
+
+    svg
+    .selectAll('circle')
+    .data(filteredStations, (d) => d.short_name)
+    .join('circle')
+    .attr('r', (d) => radiusScale(d.totalTraffic))
+    .select('title')
+    .text(
+      (d) => `${d.name}
+  ${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`
+      );
   }
   
   function updateTimeDisplay() {
@@ -189,7 +195,7 @@ ${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`
     
     updateScatterPlot(timeFilter);
   }
-  
+
   timeSlider.addEventListener('input', updateTimeDisplay);
   updateTimeDisplay();
 });

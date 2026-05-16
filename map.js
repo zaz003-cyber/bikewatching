@@ -178,25 +178,19 @@ map.on('load', async () => {
   const timeSlider = document.getElementById('time-slider');
   const selectedTime = document.getElementById('selected-time');
   const anyTimeLabel = document.getElementById('any-time');
-
+  
   function updateScatterPlot(timeFilter) {
     const filteredTrips = filterTripsByTime(trips, timeFilter);
     const filteredStations = computeStationTraffic(stations, filteredTrips);
+    
+    timeFilter === -1
+    ? radiusScale.range([0, 25])
+    : radiusScale.range([3, 50]);
 
-    radiusScale
-      .domain([0, d3.max(filteredStations, (d) => d.totalTraffic)])
-      .range(timeFilter === -1 ? [0, 25] : [3, 50]);
-
-    svg
-      .selectAll('circle')
-      .data(filteredStations, (d) => d.short_name)
-      .join('circle')
-      .attr('r', (d) => radiusScale(d.totalTraffic))
-      .style('--departure-ratio', (d) =>
-        stationFlow(getDepartureRatio(d))
-      )
-      .select('title')
-      .text((d) => getTooltipText(d));
+    circles
+    .data(filteredStations, (d) => d.short_name)
+    .join('circle')
+    .attr('r', (d) => radiusScale(d.totalTraffic));
   }
 
   function updateTimeDisplay() {

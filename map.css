@@ -17,9 +17,20 @@
   pointer-events: none;
 }
 
+#map svg circle,
+.legend > div {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
 #map svg circle {
-  fill: steelblue;
-  fill-opacity: 0.6;
+  fill: var(--color);
+  fill-opacity: 0.65;
   stroke: white;
   stroke-width: 1;
   pointer-events: auto;
@@ -43,11 +54,6 @@ header label {
   width: 16rem;
 }
 
-#any-time {
-  color: #666;
-  font-style: italic;
-}
-
 .time-display {
   position: relative;
   display: block;
@@ -61,4 +67,35 @@ header label {
   left: 0;
   top: 0;
   line-height: 1.5;
+}
+
+#any-time {
+  color: #666;
+  font-style: italic;
+}
+
+.legend {
+  display: flex;
+  gap: 1px;
+  margin-block: 1rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+
+.legend > div {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background: var(--color);
+  color: white;
+  font-weight: 700;
+  text-align: center;
+}
+
+.legend > div:first-child {
+  text-align: left;
+}
+
+.legend > div:last-child {
+  text-align: right;
 }

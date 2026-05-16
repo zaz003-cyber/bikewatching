@@ -55,6 +55,29 @@ function computeStationTraffic(stations, trips) {
   });
 }
 
+function formatTime(minutes) {
+  const date = new Date(0, 0, 0, 0, minutes);
+  return date.toLocaleString('en-US', { timeStyle: 'short' });
+}
+
+function minutesSinceMidnight(date) {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+function filterTripsByTime(trips, timeFilter) {
+  return timeFilter === -1
+    ? trips
+    : trips.filter((trip) => {
+        const startedMinutes = minutesSinceMidnight(trip.started_at);
+        const endedMinutes = minutesSinceMidnight(trip.ended_at);
+
+        return (
+          Math.abs(startedMinutes - timeFilter) <= 60 ||
+          Math.abs(endedMinutes - timeFilter) <= 60
+        );
+      });
+}
+
 map.on('load', async () => {
   map.addSource('boston-bike-lanes', {
     type: 'geojson',
@@ -109,7 +132,7 @@ const radiusScale = d3
 
 const circles = svg
   .selectAll('circle')
-  .data(stations)
+  .data(stations, (d) => d.short_name)
   .enter()
   .append('circle')
   .attr('r', (d) => radiusScale(d.totalTraffic))
@@ -134,4 +157,39 @@ ${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
+
+  const timeSlider = document.getElementById('time-slider');
+  const selectedTime = document.getElementById('selected-time');
+  const anyTimeLabel = document.getElementById('any-time');
+  
+  function updateScatterPlot(timeFilter) {
+    const filteredTrips = filterTripsByTime(trips, timeFilter);
+    const filteredStations = computeStationTraffic(stations, filteredTrips);
+
+    timeFilter === -1
+      ? radiusScale.range([0, 25])
+      : radiusScale.range([3, 50]);
+      
+    circles
+      .data(filteredStations, (d) => d.short_name)
+      .join('circle')
+      .attr('r', (d) => radiusScale(d.totalTraffic));
+  }
+  
+  function updateTimeDisplay() {
+    const timeFilter = Number(timeSlider.value);
+    
+    if (timeFilter === -1) {
+        selectedTime.textContent = '';
+        anyTimeLabel.style.display = 'block';
+    } else {
+        selectedTime.textContent = formatTime(timeFilter);
+        anyTimeLabel.style.display = 'none';
+    }
+    
+    updateScatterPlot(timeFilter);
+  }
+  
+  timeSlider.addEventListener('input', updateTimeDisplay);
+  updateTimeDisplay();
 });

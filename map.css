@@ -24,3 +24,32 @@
   stroke-width: 1;
   pointer-events: auto;
 }
+
+header {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+}
+
+header label {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  font-size: 0.9rem;
+}
+
+#time-slider {
+  width: 16rem;
+}
+
+#selected-time,
+#any-time {
+  display: block;
+  min-height: 1.2em;
+}
+
+#any-time {
+  color: #666;
+  font-style: italic;
+}
